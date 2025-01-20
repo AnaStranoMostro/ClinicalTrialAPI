@@ -1,4 +1,9 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using ClinicalTrialAPI.Data;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<ClinicalTrialAPIContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ClinicalTrialAPIContext") ?? throw new InvalidOperationException("Connection string 'ClinicalTrialAPIContext' not found.")));
 
 // Add services to the container.
 
