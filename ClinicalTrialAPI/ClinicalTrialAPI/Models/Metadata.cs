@@ -1,7 +1,7 @@
 ﻿
 using System;
 using System.ComponentModel.DataAnnotations;
-using ClinicalTrialAPI.Extensions;
+using ClinicalTrialAPI.Shared;
 using Newtonsoft.Json;
 
 namespace ClinicalTrialAPI.Models;

@@ -5,7 +5,7 @@ using ClinicalTrialAPI.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ClinicalTrialAPI.Extensions;
+namespace ClinicalTrialAPI.Shared;
 
 public class JsonEnumStringConverter : StringEnumConverter
 {
