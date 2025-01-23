@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  clinicaltrialapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clinicaltrialapi
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    environment:
+      - DATABASE_URL=mssql://sa:StronKPassW0rd1!@mssql:1433/ClinicalTrialAPI?pooling=true
+    depends_on:
+      - mssql
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      - SA_PASSWORD=StronKPassW0rd1!
+      - ACCEPT_EULA=Y
+    volumes:
+      - mssql-data:/var/opt/mssql
+volumes:
+  mssql-data:
+ 
