@@ -1,16 +1,9 @@
-version: '3.8'
-
 services:
   clinicaltrialapi:
+    image: ${DOCKER_REGISTRY-}clinicaltrialapi
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: clinicaltrialapi
-    ports:
-      - "5000:8080"
-      - "5001:8081"
-    environment:
-      - DATABASE_URL=mssql://sa:StronKPassW0rd1!@mssql:1433/ClinicalTrialAPI?pooling=true
+      dockerfile: ClinicalTrialAPI/Dockerfile
     depends_on:
       - mssql
 
