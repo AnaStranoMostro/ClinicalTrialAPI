@@ -1,6 +1,5 @@
-﻿
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
 using ClinicalTrialAPI.Shared;
 using Newtonsoft.Json;
 
@@ -9,10 +8,10 @@ namespace ClinicalTrialAPI.Models;
 public class ClinicalTrialMetadata
 {
     [Key]
-    public string TrialId { get; set; }
+    public required string TrialId { get; set; }
 
     [Required]
-    public string Title { get; set; }
+    public required string Title { get; set; }
 
     [Required]
     [DataType(DataType.Date)]
@@ -28,12 +27,17 @@ public class ClinicalTrialMetadata
     [Required]
     [JsonConverter(typeof(JsonEnumStringConverter))]
     public ClinicalTrialStatus Status { get; set; }
+
+    public int TrialDuration { get; set; }
+
 }
 
 public enum ClinicalTrialStatus
 {
-    [Display(Name = "Not Started")]
+    [EnumMember(Value = "Not Started")]
     NotStarted,
+    [EnumMember(Value = "Ongoing")]
     Ongoing,
+    [EnumMember(Value = "Completed")]
     Completed
 }

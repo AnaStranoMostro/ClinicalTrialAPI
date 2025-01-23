@@ -1,54 +1,82 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+﻿using System.Reflection;
 using ClinicalTrialAPI.Data;
 using ClinicalTrialAPI.Models;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
+using Swashbuckle.AspNetCore.Annotations;
+
 
 namespace ClinicalTrialAPI.Controllers
 {
+    /// <summary>
+    /// Controller for managing clinical trial metadata.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class ClinicalTrialMetadatasController : ControllerBase
     {
         private readonly ClinicalTrialAPIContext _context;
 
+        /// <summary>
+        /// Gets the context for the clinical trial API.
+        /// </summary>
         public ClinicalTrialAPIContext Context => _context;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClinicalTrialMetadatasController"/> class.
+        /// </summary>
+        /// <param name="context">The context for the clinical trial API.</param>
         public ClinicalTrialMetadatasController(ClinicalTrialAPIContext context)
         {
             _context = context;
         }
 
-        // GET: api/ClinicalTrialMetadatas
+        /// <summary>
+        /// Gets a list of clinical trial metadata.
+        /// </summary>
+        /// <param name="trialId">The trial ID to filter by.</param>
+        /// <param name="title">The title to filter by.</param>
+        /// <param name="status">The status to filter by.</param>
+        /// <returns>A list of clinical trial metadata.</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ClinicalTrialMetadata>>> GetClinicalTrialMetadata()
+        [SwaggerOperation(Summary = "Gets a list of clinical trial metadata", Description = "Retrieves a list of clinical trial metadata based on optional filters.")]
+        [SwaggerResponse(StatusCodes.Status200OK, "Returns the list of clinical trial metadata", typeof(IEnumerable<ClinicalTrialMetadata>))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request")]
+        public async Task<ActionResult<IEnumerable<ClinicalTrialMetadata>>> GetClinicalTrialMetadata([FromQuery] string? trialId, [FromQuery] string? title, [FromQuery] ClinicalTrialStatus? status)
         {
-            return await Context.ClinicalTrialMetadata.ToListAsync();
-        }
+            IQueryable<ClinicalTrialMetadata> query = Context.ClinicalTrialMetadata.AsQueryable();
 
-        // GET: api/ClinicalTrialMetadatas/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ClinicalTrialMetadata>> GetClinicalTrialMetadata(string id)
-        {
-            var clinicalTrialMetadata = await Context.ClinicalTrialMetadata.FindAsync(id);
-
-            if (clinicalTrialMetadata == null)
+            if (!string.IsNullOrEmpty(trialId))
             {
-                return NotFound();
+                query = query.Where(ct => ct.TrialId == trialId);
             }
 
-            return clinicalTrialMetadata;
+            if (!string.IsNullOrEmpty(title))
+            {
+                query = query.Where(ct => ct.Title.Contains(title));
+            }
+
+            if (status.HasValue)
+            {
+                query = query.Where(ct => ct.Status == status.Value);
+            }
+
+            return await query.ToListAsync();
         }
 
-        // PUT: api/ClinicalTrialMetadatas/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Updates a clinical trial metadata.
+        /// </summary>
+        /// <param name="id">The trial ID.</param>
+        /// <param name="clinicalTrialMetadata">The clinical trial metadata to update.</param>
+        /// <returns>No content if successful.</returns>
         [HttpPut("{id}")]
+        [SwaggerOperation(Summary = "Updates a clinical trial metadata", Description = "Updates the clinical trial metadata for the specified trial ID.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Clinical trial metadata updated successfully")]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Clinical trial metadata not found")]
         public async Task<IActionResult> PutClinicalTrialMetadata(string id, ClinicalTrialMetadata clinicalTrialMetadata)
         {
             if (id != clinicalTrialMetadata.TrialId)
@@ -77,9 +105,16 @@ namespace ClinicalTrialAPI.Controllers
             return NoContent();
         }
 
-        // POST: api/ClinicalTrialMetadata
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Creates a new clinical trial metadata.
+        /// </summary>
+        /// <param name="jsonFile">The JSON file containing clinical trial metadata.</param>
+        /// <returns>The created clinical trial metadata.</returns>
         [HttpPost]
+        [SwaggerOperation(Summary = "Creates a new clinical trial metadata", Description = "Creates a new clinical trial metadata from the provided JSON file.")]
+        [SwaggerResponse(StatusCodes.Status201Created, "Clinical trial metadata created successfully", typeof(ClinicalTrialMetadata))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request")]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Clinical trial metadata already exists")]
         public async Task<ActionResult<ClinicalTrialMetadata>> PostClinicalTrialMetadata(IFormFile jsonFile)
         {
             if (jsonFile == null || jsonFile.Length == 0)
@@ -88,59 +123,63 @@ namespace ClinicalTrialAPI.Controllers
             }
 
             string jsonContent;
+            //getting content of the file
             using (var reader = new StreamReader(jsonFile.OpenReadStream()))
             {
                 jsonContent = await reader.ReadToEndAsync();
             }
 
-            var schema = JSchema.Parse(@"{
-                '$schema': 'http://json-schema.org/draft-07/schema#',
-                'title': 'ClinicalTrialMetadata',
-                'type': 'object',
-                'properties': {
-                    'trialId': {
-                        'type': 'string'
-                    },
-                    'title': {
-                        'type': 'string'
-                    },
-                    'startDate': {
-                        'type': 'string',
-                        'format': 'date'
-                    },
-                    'endDate': {
-                        'type': 'string',
-                        'format': 'date'
-                    },
-                    'participants': {
-                        'type': 'integer',
-                        'minimum': 1
-                    },
-                    'status': {
-                        'type': 'string',
-                        'enum': [
-                            'Not Started',
-                            'Ongoing',
-                            'Completed'
-                        ]
-                    }
-                },
-                'required': [
-                    'trialId',
-                    'title',
-                    'startDate',
-                    'status'
-                ],
-                'additionalProperties': false
-            }");
+            //get the schema from Resources
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "ClinicalTrialAPI.Properties.Resources.jsonschema.json";
+            string schemaText;
 
-            JObject jsonObject = JObject.Parse(jsonContent);
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    return BadRequest("Schema resource not found.");
+                }
+                using (var reader = new StreamReader(stream))
+                {
+                    schemaText = reader.ReadToEnd();
+                }
+            }
+
+            var schema = JSchema.Parse(schemaText);
+
+            //validating object against schema
+            var jsonObject = JObject.Parse(jsonContent);
             if (!jsonObject.IsValid(schema, out IList<string> validationErrors))
             {
                 return BadRequest(new { Errors = validationErrors });
             }
 
             var clinicalTrialMetadata = jsonObject.ToObject<ClinicalTrialMetadata>();
+
+            if (clinicalTrialMetadata == null)
+            {
+                return BadRequest("Invalid clinical trial metadata.");
+            }
+
+            // If end date is null or empty string, set it to 1 month after start date
+         
+            if(!clinicalTrialMetadata.EndDate.HasValue)
+            {
+                clinicalTrialMetadata.EndDate = clinicalTrialMetadata.StartDate.AddMonths(1);
+                clinicalTrialMetadata.Status = ClinicalTrialStatus.Ongoing;
+
+            }
+            // Calculate trial duration and set status
+            // Calculate trial duration and set status
+            if (clinicalTrialMetadata.EndDate.HasValue)
+            {
+                clinicalTrialMetadata.TrialDuration = CalculateTrialDuration(clinicalTrialMetadata.StartDate, clinicalTrialMetadata.EndDate.Value);
+            }
+            else
+            {
+                clinicalTrialMetadata.TrialDuration = CalculateTrialDuration(clinicalTrialMetadata.StartDate, clinicalTrialMetadata.StartDate.AddMonths(1));
+            }
 
             Context.ClinicalTrialMetadata.Add(clinicalTrialMetadata);
             try
@@ -162,8 +201,22 @@ namespace ClinicalTrialAPI.Controllers
             return CreatedAtAction("GetClinicalTrialMetadata", new { id = clinicalTrialMetadata.TrialId }, clinicalTrialMetadata);
         }
 
-        // DELETE: api/ClinicalTrialMetadatas/5
+        private int CalculateTrialDuration(DateTime startDate, DateTime endDate)
+        {
+  
+             return (endDate - startDate).Days;
+           
+        }
+
+        /// <summary>
+        /// Deletes a clinical trial metadata.
+        /// </summary>
+        /// <param name="id">The trial ID.</param>
+        /// <returns>No content if successful.</returns>
         [HttpDelete("{id}")]
+        [SwaggerOperation(Summary = "Deletes a clinical trial metadata", Description = "Deletes the clinical trial metadata for the specified trial ID.")]
+        [SwaggerResponse(StatusCodes.Status204NoContent, "Clinical trial metadata deleted successfully")]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Clinical trial metadata not found")]
         public async Task<IActionResult> DeleteClinicalTrialMetadata(string id)
         {
             var clinicalTrialMetadata = await Context.ClinicalTrialMetadata.FindAsync(id);

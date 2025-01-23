@@ -11,7 +11,7 @@ public class JsonEnumStringConverter : StringEnumConverter
 {
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        var enumValue = (ClinicalTrialStatus)value;
+        ClinicalTrialStatus enumValue = (ClinicalTrialStatus)value;
         string stringValue = enumValue.GetEnumDisplayText(); // Get the display name of the enum value
         writer.WriteValue(stringValue);
     }
@@ -21,9 +21,9 @@ public class JsonEnumStringConverter : StringEnumConverter
         if (reader.TokenType == JsonToken.String)
         {
             string enumString = (string)reader.Value;
-            foreach (var value in Enum.GetValues(objectType))
+            foreach (object? value in Enum.GetValues(objectType))
             {
-                var enumValue = (ClinicalTrialStatus)value;
+                ClinicalTrialStatus enumValue = (ClinicalTrialStatus)value;
                 if (enumValue.GetEnumDisplayText() == enumString)
                 {
                     return value;
@@ -38,7 +38,7 @@ public static class EnumExtensions
 {
     public static string GetEnumDisplayText(this Enum value)
     {
-        var displayAttribute = value.GetType()
+        DisplayAttribute? displayAttribute = value.GetType()
             .GetMember(value.ToString())
             .FirstOrDefault()
             ?.GetCustomAttribute<DisplayAttribute>();

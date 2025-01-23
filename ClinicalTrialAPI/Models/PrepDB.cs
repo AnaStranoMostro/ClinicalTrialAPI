@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using ClinicalTrialAPI.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using ClinicalTrialAPI.Data;
 
 
 namespace ClinicalTrialAPI.Models;
@@ -11,9 +9,15 @@ public static class PrepDB
 
     public static void PrepPopulation(IApplicationBuilder app)
     {
-        using (var serviceScope = app.ApplicationServices.CreateScope())
+        using IServiceScope serviceScope = app.ApplicationServices.CreateScope();
+        var context = serviceScope.ServiceProvider.GetService<ClinicalTrialAPIContext>();
+        if (context != null)
         {
-            SeedData(serviceScope.ServiceProvider.GetService<ClinicalTrialAPIContext>());
+            SeedData(context);
+        }
+        else
+        {
+           Console.WriteLine("Error: ClinicalTrialAPIContext is null.");
         }
     }
 
@@ -33,7 +37,8 @@ public static class PrepDB
                     StartDate = DateTime.Parse("2022-01-01"),
                     EndDate = DateTime.Parse("2022-12-31"),
                     Participants = 1000,
-                    Status = ClinicalTrialStatus.NotStarted
+                    Status = ClinicalTrialStatus.NotStarted,
+                    TrialDuration = 365
                 },
                 new ClinicalTrialMetadata()
                 {
@@ -42,14 +47,16 @@ public static class PrepDB
                     StartDate = DateTime.Parse("2022-01-01"),
                     EndDate = DateTime.Parse("2022-12-31"),
                     Participants = 500,
-                    Status = ClinicalTrialStatus.Ongoing
+                    Status = ClinicalTrialStatus.Ongoing,
+                    TrialDuration = 365
+
                 }
             );
             context.SaveChanges();
         }
         else
         {
-            System.Console.WriteLine("Already have data - not seeding");
+            Console.WriteLine("Already have data - not seeding");
         }
     }
 }
