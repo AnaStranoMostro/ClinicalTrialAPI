@@ -10,14 +10,14 @@ public static class PrepDB
     public static void PrepPopulation(IApplicationBuilder app)
     {
         using IServiceScope serviceScope = app.ApplicationServices.CreateScope();
-        var context = serviceScope.ServiceProvider.GetService<ClinicalTrialAPIContext>();
+        ClinicalTrialAPIContext? context = serviceScope.ServiceProvider.GetService<ClinicalTrialAPIContext>();
         if (context != null)
         {
             SeedData(context);
         }
         else
         {
-           Console.WriteLine("Error: ClinicalTrialAPIContext is null.");
+            Console.WriteLine("Error: ClinicalTrialAPIContext is null.");
         }
     }
 
@@ -52,7 +52,7 @@ public static class PrepDB
 
                 }
             );
-            context.SaveChanges();
+             context.SaveChanges();
         }
         else
         {

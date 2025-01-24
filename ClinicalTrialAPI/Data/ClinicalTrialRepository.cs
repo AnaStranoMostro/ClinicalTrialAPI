@@ -41,14 +41,14 @@ namespace ClinicalTrialAPI.Data
 
         public async Task AddClinicalTrialMetadataAsync(ClinicalTrialMetadata clinicalTrialMetadata)
         {
-            _context.ClinicalTrialMetadata.Add(clinicalTrialMetadata);
-            await _context.SaveChangesAsync();
+             _context.ClinicalTrialMetadata.Add(clinicalTrialMetadata);
+             await _context.SaveChangesAsync();
         }
 
         public async Task DeleteClinicalTrialMetadataAsync(ClinicalTrialMetadata clinicalTrialMetadata)
         {
-            _context.ClinicalTrialMetadata.Remove(clinicalTrialMetadata);
-            await _context.SaveChangesAsync();
+             _context.ClinicalTrialMetadata.Remove(clinicalTrialMetadata);
+             await _context.SaveChangesAsync();
         }
 
         public bool ClinicalTrialMetadataExists(string id)

@@ -5,6 +5,9 @@ using Newtonsoft.Json;
 
 namespace ClinicalTrialAPI.Models;
 
+/// <summary>
+/// Metadata for a clinical trial.
+/// </summary>
 public class ClinicalTrialMetadata
 {
     [Key]
@@ -29,15 +32,28 @@ public class ClinicalTrialMetadata
     public ClinicalTrialStatus Status { get; set; }
 
     public int TrialDuration { get; set; }
-
 }
 
+/// <summary>
+/// Status of a clinical trial.
+/// </summary>
 public enum ClinicalTrialStatus
 {
+    /// <summary>
+    /// The trial has not started yet.
+    /// </summary>
     [EnumMember(Value = "Not Started")]
     NotStarted,
+
+    /// <summary>
+    /// The trial is currently ongoing.
+    /// </summary>
     [EnumMember(Value = "Ongoing")]
     Ongoing,
+
+    /// <summary>
+    /// The trial has been completed.
+    /// </summary>
     [EnumMember(Value = "Completed")]
     Completed
 }

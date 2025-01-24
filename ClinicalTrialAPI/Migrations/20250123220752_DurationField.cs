@@ -10,7 +10,7 @@ namespace ClinicalTrialAPI.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+             migrationBuilder.AddColumn<int>(
                 name: "TrialDuration",
                 table: "ClinicalTrialMetadata",
                 type: "int",
@@ -21,7 +21,7 @@ namespace ClinicalTrialAPI.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+             migrationBuilder.DropColumn(
                 name: "TrialDuration",
                 table: "ClinicalTrialMetadata");
         }

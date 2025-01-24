@@ -1,12 +1,9 @@
-﻿using System.Reflection;
-using ClinicalTrialAPI.Data;
+﻿using ClinicalTrialAPI.Data;
+using ClinicalTrialAPI.Helpers;
 using ClinicalTrialAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 using Swashbuckle.AspNetCore.Annotations;
-using ClinicalTrialAPI.Helpers;
 
 
 namespace ClinicalTrialAPI.Controllers
@@ -86,7 +83,7 @@ namespace ClinicalTrialAPI.Controllers
 
             string jsonContent;
             //getting content of the file
-            using (var reader = new StreamReader(jsonFile.OpenReadStream()))
+            using (StreamReader reader = new StreamReader(jsonFile.OpenReadStream()))
             {
                 jsonContent = await reader.ReadToEndAsync();
             }
@@ -96,7 +93,7 @@ namespace ClinicalTrialAPI.Controllers
                 return BadRequest(new { Errors = validationErrors.ToList() });
             }
 
-            var clinicalTrialMetadata = JsonSchemaHelper.ParseJson(jsonContent).ToObject<ClinicalTrialMetadata>();
+            ClinicalTrialMetadata? clinicalTrialMetadata = JsonSchemaHelper.ParseJson(jsonContent).ToObject<ClinicalTrialMetadata>();
 
             if (clinicalTrialMetadata == null)
             {
@@ -119,10 +116,10 @@ namespace ClinicalTrialAPI.Controllers
                 clinicalTrialMetadata.TrialDuration = CalculateTrialDuration(clinicalTrialMetadata.StartDate, clinicalTrialMetadata.StartDate.AddMonths(1));
             }
 
-            Context.ClinicalTrialMetadata.Add(clinicalTrialMetadata);
+             Context.ClinicalTrialMetadata.Add(clinicalTrialMetadata);
             try
             {
-                await Context.SaveChangesAsync();
+                 await Context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
@@ -141,9 +138,9 @@ namespace ClinicalTrialAPI.Controllers
 
         private int CalculateTrialDuration(DateTime startDate, DateTime endDate)
         {
-  
-             return (endDate - startDate).Days;
-           
+
+            return (endDate - startDate).Days;
+
         }
 
         /// <summary>
@@ -157,14 +154,14 @@ namespace ClinicalTrialAPI.Controllers
         [SwaggerResponse(StatusCodes.Status404NotFound, "Clinical trial metadata not found")]
         public async Task<IActionResult> DeleteClinicalTrialMetadata(string id)
         {
-            var clinicalTrialMetadata = await Context.ClinicalTrialMetadata.FindAsync(id);
+            ClinicalTrialMetadata? clinicalTrialMetadata = await Context.ClinicalTrialMetadata.FindAsync(id);
             if (clinicalTrialMetadata == null)
             {
                 return NotFound();
             }
 
-            Context.ClinicalTrialMetadata.Remove(clinicalTrialMetadata);
-            await Context.SaveChangesAsync();
+             Context.ClinicalTrialMetadata.Remove(clinicalTrialMetadata);
+             await Context.SaveChangesAsync();
 
             return NoContent();
         }

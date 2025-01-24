@@ -11,26 +11,26 @@ namespace ClinicalTrialAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
              migrationBuilder.CreateTable(
-                name: "ClinicalTrialMetadata",
-                columns: table => new
-                {
-                    TrialId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Participants = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
+               name: "ClinicalTrialMetadata",
+               columns: table => new
+               {
+                   TrialId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                   Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                   StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                   EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                   Participants = table.Column<int>(type: "int", nullable: false),
+                   Status = table.Column<int>(type: "int", nullable: false)
+               },
+               constraints: table =>
+               {
                     table.PrimaryKey("PK_ClinicalTrialMetadata", x => x.TrialId);
-                });
+               });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+             migrationBuilder.DropTable(
                 name: "ClinicalTrialMetadata");
         }
     }

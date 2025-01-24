@@ -16,14 +16,14 @@ namespace Tests.Controllers
 
         public ClinicalTrialMetadatasControllerTests()
         {
-            var options = new DbContextOptionsBuilder<ClinicalTrialAPIContext>()
+            DbContextOptions<ClinicalTrialAPIContext> options = new DbContextOptionsBuilder<ClinicalTrialAPIContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
             _context = new ClinicalTrialAPIContext(options);
             _controller = new ClinicalTrialMetadatasController(_context);
 
             //seed data
-            _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
+             _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
             {
                 TrialId = "test-id",
                 Title = "Test Title",
@@ -33,17 +33,17 @@ namespace Tests.Controllers
                 Status = ClinicalTrialStatus.NotStarted,
                 TrialDuration = 40
             });
-            _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
+             _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
             {
                 TrialId = "test-id-2",
                 Title = "Test Title 2",
                 StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(365),    
+                EndDate = DateTime.Now.AddDays(365),
                 Participants = 200,
                 Status = ClinicalTrialStatus.Completed,
                 TrialDuration = 365
             });
-            _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
+             _context.ClinicalTrialMetadata.Add(new ClinicalTrialMetadata
             {
                 TrialId = "test-id-3",
                 Title = "Test Title 3",
@@ -54,7 +54,7 @@ namespace Tests.Controllers
                 TrialDuration = 100
             });
             //more data can be added here
-            _context.SaveChanges();
+             _context.SaveChanges();
         }
 
         [Fact]
@@ -66,13 +66,13 @@ namespace Tests.Controllers
             ClinicalTrialStatus? status = null;
 
             // Act
-            var result = await _controller.GetClinicalTrialMetadata(
+            ActionResult<IEnumerable<ClinicalTrialMetadata>> result = await _controller.GetClinicalTrialMetadata(
                 trialId,
                 title,
                 status);
 
             // Assert
-            Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
+             Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
             Assert.Equal(3, result.Value.Count());
         }
 
@@ -85,14 +85,14 @@ namespace Tests.Controllers
             ClinicalTrialStatus? status = null;
 
             // Act
-            var result = await _controller.GetClinicalTrialMetadata(
+            ActionResult<IEnumerable<ClinicalTrialMetadata>> result = await _controller.GetClinicalTrialMetadata(
                 trialId,
                 title,
                 status);
 
             // Assert
-            Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
-            Assert.Single(result.Value);
+             Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
+             Assert.Single(result.Value);
             Assert.Equal("test-id-3", result.Value.First().TrialId);
         }
 
@@ -106,13 +106,13 @@ namespace Tests.Controllers
             ClinicalTrialStatus? status = ClinicalTrialStatus.Completed;
 
             // Act
-            var result = await _controller.GetClinicalTrialMetadata(
+            ActionResult<IEnumerable<ClinicalTrialMetadata>> result = await _controller.GetClinicalTrialMetadata(
                 trialId,
                 title,
                 status);
 
             // Assert
-            Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
+             Assert.IsType<List<ClinicalTrialMetadata>>(result.Value);
             Assert.Equal(2, result.Value.Count());
             Assert.All(result.Value, item => Assert.Equal(ClinicalTrialStatus.Completed, item.Status));
         }
@@ -122,7 +122,7 @@ namespace Tests.Controllers
         public async Task PostClinicalTrialMetadata_StateUnderTest_ExpectedBehavior()
         {
             // Arrange
-            var jsonContent = @"
+            string jsonContent = @"
             {
                 ""trialId"": ""test-id-4"",
                 ""title"": ""Test Title 4"",
@@ -131,19 +131,19 @@ namespace Tests.Controllers
                 ""participants"": 150,
                 ""status"": ""Not Started""
             }";
-            var jsonFile = new Mock<IFormFile>();
-            var content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
-            jsonFile.Setup(_ => _.OpenReadStream()).Returns(content);
-            jsonFile.Setup(_ => _.FileName).Returns("test.json");
-            jsonFile.Setup(_ => _.Length).Returns(content.Length);
+            Mock<IFormFile> jsonFile = new Mock<IFormFile>();
+            MemoryStream content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
+             jsonFile.Setup(> _.OpenReadStream()).Returns(content);
+             jsonFile.Setup(> _.FileName).Returns("test.json");
+             jsonFile.Setup(> _.Length).Returns(content.Length);
 
             // Act
-            var result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
+            ActionResult<ClinicalTrialMetadata> result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
 
             // Assert
-            Assert.IsType<CreatedAtActionResult>(result.Result);
-            var createdResult = result.Result as CreatedAtActionResult;
-            var createdMetadata = createdResult?.Value as ClinicalTrialMetadata;
+             Assert.IsType<CreatedAtActionResult>(result.Result);
+            CreatedAtActionResult? createdResult = result.Result as CreatedAtActionResult;
+            ClinicalTrialMetadata? createdMetadata = createdResult?.Value as ClinicalTrialMetadata;
             Assert.NotNull(createdMetadata);
             Assert.Equal("test-id-4", createdMetadata.TrialId);
             Assert.Equal(31, createdMetadata.TrialDuration);
@@ -153,7 +153,7 @@ namespace Tests.Controllers
         public async Task PostClinicalTrialMetadata_WithoutAddedEndDate_ExpectedBehavior()
         {
             // Arrange
-            var jsonContent = @"
+            string jsonContent = @"
             {
                 ""trialId"": ""test-id-5"",
                 ""title"": ""Test Title 5"",
@@ -161,19 +161,19 @@ namespace Tests.Controllers
                 ""participants"": 150,
                 ""status"": ""Not Started""
             }";
-            var jsonFile = new Mock<IFormFile>();
-            var content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
-            jsonFile.Setup(_ => _.OpenReadStream()).Returns(content);
-            jsonFile.Setup(_ => _.FileName).Returns("test.json");
-            jsonFile.Setup(_ => _.Length).Returns(content.Length);
+            Mock<IFormFile> jsonFile = new Mock<IFormFile>();
+            MemoryStream content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
+             jsonFile.Setup(> _.OpenReadStream()).Returns(content);
+             jsonFile.Setup(> _.FileName).Returns("test.json");
+             jsonFile.Setup(> _.Length).Returns(content.Length);
 
             // Act
-            var result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
+            ActionResult<ClinicalTrialMetadata> result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
 
             // Assert
-            Assert.IsType<CreatedAtActionResult>(result.Result);
-            var createdResult = result.Result as CreatedAtActionResult;
-            var createdMetadata = createdResult?.Value as ClinicalTrialMetadata;
+             Assert.IsType<CreatedAtActionResult>(result.Result);
+            CreatedAtActionResult? createdResult = result.Result as CreatedAtActionResult;
+            ClinicalTrialMetadata? createdMetadata = createdResult?.Value as ClinicalTrialMetadata;
             Assert.NotNull(createdMetadata);
             Assert.Equal("test-id-5", createdMetadata.TrialId);
             Assert.Equal(31, createdMetadata.TrialDuration);
@@ -188,11 +188,11 @@ namespace Tests.Controllers
             string id = "test-id";
 
             // Act
-            var result = await _controller.DeleteClinicalTrialMetadata(
+            IActionResult result = await _controller.DeleteClinicalTrialMetadata(
                 id);
 
             // Assert
-            Assert.IsType<NoContentResult>(result);
+             Assert.IsType<NoContentResult>(result);
             Assert.Null(_context.ClinicalTrialMetadata.Find(id));
         }
     }
