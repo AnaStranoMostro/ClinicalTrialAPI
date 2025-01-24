@@ -90,7 +90,7 @@ namespace ClinicalTrialAPI.Controllers
 
             if (!JsonSchemaHelper.ValidateJson(jsonContent, out IList<string> validationErrors))
             {
-                return BadRequest(new { Errors = validationErrors.ToList() });
+                return BadRequest(new ErrorResponse{ Errors = validationErrors.ToList() });
             }
 
             ClinicalTrialMetadata? clinicalTrialMetadata = JsonSchemaHelper.ParseJson(jsonContent).ToObject<ClinicalTrialMetadata>();
@@ -105,6 +105,12 @@ namespace ClinicalTrialAPI.Controllers
             {
                 clinicalTrialMetadata.EndDate = clinicalTrialMetadata.StartDate.AddMonths(1);
                 clinicalTrialMetadata.Status = ClinicalTrialStatus.Ongoing;
+            }
+
+            //if end date is not empty, but is before start date, return bad request
+            if (clinicalTrialMetadata.EndDate < clinicalTrialMetadata.StartDate)
+            {
+                return BadRequest("End date cannot be before start date.");
             }
             // Calculate trial duration and set status
             if (clinicalTrialMetadata.EndDate.HasValue)

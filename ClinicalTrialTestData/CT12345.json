@@ -1,6 +1,6 @@
 {
     "trialId": "CT12345",
-    "title": "Tvoju",
+    "title": "Sample Clinical Trial Data Without EndDate Supplied",
     "startDate": "2022-09-15",
     "participants": 50,
     "status": "Not Started"
