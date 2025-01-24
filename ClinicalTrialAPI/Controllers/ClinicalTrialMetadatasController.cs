@@ -171,7 +171,6 @@ namespace ClinicalTrialAPI.Controllers
 
             }
             // Calculate trial duration and set status
-            // Calculate trial duration and set status
             if (clinicalTrialMetadata.EndDate.HasValue)
             {
                 clinicalTrialMetadata.TrialDuration = CalculateTrialDuration(clinicalTrialMetadata.StartDate, clinicalTrialMetadata.EndDate.Value);
