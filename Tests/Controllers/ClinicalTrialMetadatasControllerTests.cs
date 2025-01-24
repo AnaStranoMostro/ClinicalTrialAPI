@@ -133,9 +133,10 @@ namespace Tests.Controllers
             }";
             Mock<IFormFile> jsonFile = new Mock<IFormFile>();
             MemoryStream content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
-             jsonFile.Setup(> _.OpenReadStream()).Returns(content);
-             jsonFile.Setup(> _.FileName).Returns("test.json");
-             jsonFile.Setup(> _.Length).Returns(content.Length);
+            jsonFile.Setup(f => f.OpenReadStream()).Returns(content);
+            jsonFile.Setup(f => f.FileName).Returns("test.json");
+            jsonFile.Setup(f => f.Length).Returns(content.Length);
+
 
             // Act
             ActionResult<ClinicalTrialMetadata> result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
@@ -163,9 +164,9 @@ namespace Tests.Controllers
             }";
             Mock<IFormFile> jsonFile = new Mock<IFormFile>();
             MemoryStream content = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(jsonContent));
-             jsonFile.Setup(> _.OpenReadStream()).Returns(content);
-             jsonFile.Setup(> _.FileName).Returns("test.json");
-             jsonFile.Setup(> _.Length).Returns(content.Length);
+             jsonFile.Setup(f => f.OpenReadStream()).Returns(content);
+             jsonFile.Setup(f => f.FileName).Returns("test.json");
+             jsonFile.Setup(f => f.Length).Returns(content.Length);
 
             // Act
             ActionResult<ClinicalTrialMetadata> result = await _controller.PostClinicalTrialMetadata(jsonFile.Object);
