@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
 using Swashbuckle.AspNetCore.Annotations;
+using ClinicalTrialAPI.Helpers;
 
 
 namespace ClinicalTrialAPI.Controllers
@@ -67,45 +68,6 @@ namespace ClinicalTrialAPI.Controllers
         }
 
         /// <summary>
-        /// Updates a clinical trial metadata.
-        /// </summary>
-        /// <param name="id">The trial ID.</param>
-        /// <param name="clinicalTrialMetadata">The clinical trial metadata to update.</param>
-        /// <returns>No content if successful.</returns>
-        [HttpPut("{id}")]
-        [SwaggerOperation(Summary = "Updates a clinical trial metadata", Description = "Updates the clinical trial metadata for the specified trial ID.")]
-        [SwaggerResponse(StatusCodes.Status204NoContent, "Clinical trial metadata updated successfully")]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid request")]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Clinical trial metadata not found")]
-        public async Task<IActionResult> PutClinicalTrialMetadata(string id, ClinicalTrialMetadata clinicalTrialMetadata)
-        {
-            if (id != clinicalTrialMetadata.TrialId)
-            {
-                return BadRequest();
-            }
-
-            Context.Entry(clinicalTrialMetadata).State = EntityState.Modified;
-
-            try
-            {
-                await Context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ClinicalTrialMetadataExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        /// <summary>
         /// Creates a new clinical trial metadata.
         /// </summary>
         /// <param name="jsonFile">The JSON file containing clinical trial metadata.</param>
@@ -129,33 +91,12 @@ namespace ClinicalTrialAPI.Controllers
                 jsonContent = await reader.ReadToEndAsync();
             }
 
-            //get the schema from Resources
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "ClinicalTrialAPI.Properties.Resources.jsonschema.json";
-            string schemaText;
-
-            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            if (!JsonSchemaHelper.ValidateJson(jsonContent, out IList<string> validationErrors))
             {
-                if (stream == null)
-                {
-                    return BadRequest("Schema resource not found.");
-                }
-                using (var reader = new StreamReader(stream))
-                {
-                    schemaText = reader.ReadToEnd();
-                }
+                return BadRequest(new { Errors = validationErrors.ToList() });
             }
 
-            var schema = JSchema.Parse(schemaText);
-
-            //validating object against schema
-            var jsonObject = JObject.Parse(jsonContent);
-            if (!jsonObject.IsValid(schema, out IList<string> validationErrors))
-            {
-                return BadRequest(new { Errors = validationErrors });
-            }
-
-            var clinicalTrialMetadata = jsonObject.ToObject<ClinicalTrialMetadata>();
+            var clinicalTrialMetadata = JsonSchemaHelper.ParseJson(jsonContent).ToObject<ClinicalTrialMetadata>();
 
             if (clinicalTrialMetadata == null)
             {
@@ -163,12 +104,10 @@ namespace ClinicalTrialAPI.Controllers
             }
 
             // If end date is null or empty string, set it to 1 month after start date
-         
-            if(!clinicalTrialMetadata.EndDate.HasValue)
+            if (!clinicalTrialMetadata.EndDate.HasValue)
             {
                 clinicalTrialMetadata.EndDate = clinicalTrialMetadata.StartDate.AddMonths(1);
                 clinicalTrialMetadata.Status = ClinicalTrialStatus.Ongoing;
-
             }
             // Calculate trial duration and set status
             if (clinicalTrialMetadata.EndDate.HasValue)

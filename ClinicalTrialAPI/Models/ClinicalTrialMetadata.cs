@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
-using ClinicalTrialAPI.Shared;
+using ClinicalTrialAPI.Helpers;
 using Newtonsoft.Json;
 
 namespace ClinicalTrialAPI.Models;
@@ -25,7 +25,7 @@ public class ClinicalTrialMetadata
     public int Participants { get; set; }
 
     [Required]
-    [JsonConverter(typeof(JsonEnumStringConverter))]
+    [JsonConverter(typeof(JsonEnumHelper))]
     public ClinicalTrialStatus Status { get; set; }
 
     public int TrialDuration { get; set; }

@@ -5,9 +5,9 @@ using ClinicalTrialAPI.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace ClinicalTrialAPI.Shared;
+namespace ClinicalTrialAPI.Helpers;
 
-public class JsonEnumStringConverter : StringEnumConverter
+public class JsonEnumHelper : StringEnumConverter
 {
     public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {

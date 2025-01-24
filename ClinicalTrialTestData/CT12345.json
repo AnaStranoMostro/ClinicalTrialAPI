@@ -1,8 +1,7 @@
 {
     "trialId": "CT12345",
-    "title": "Study on New Treatment",
+    "title": "Tvoju",
     "startDate": "2022-09-15",
-    "endDate": "2023-03-20",
     "participants": 50,
-    "status": "Ongoing"
+    "status": "Not Started"
 }
