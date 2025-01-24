@@ -1,0 +1,19 @@
+services:
+  clinicaltrialapi:
+    image: ${DOCKER_REGISTRY-}clinicaltrialapi
+    build:
+      context: .
+      dockerfile: ClinicalTrialAPI/Dockerfile
+    depends_on:
+      - mssql
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server
+    environment:
+      - SA_PASSWORD=StronKPassW0rd1!
+      - ACCEPT_EULA=Y
+    volumes:
+      - mssql-data:/var/opt/mssql
+volumes:
+  mssql-data:
+ 
